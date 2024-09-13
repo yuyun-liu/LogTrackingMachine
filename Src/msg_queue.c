@@ -13,15 +13,15 @@ static MSG_QUEUE_LEN* dev_txLen;
 static MSG_QUEUE_LEN* dev_rxLen;
 
 ACK_STRUCT dev_Ack;
-static MSG_QUEUE_ELEMENTS* md_txMsgQ;
-static MSG_QUEUE_ELEMENTS* md_rxMsgQ;
+static MSG_QUEUE_ELEMENTS* pc_txMsgQ;
+static MSG_QUEUE_ELEMENTS* pc_rxMsgQ;
 static MSG_QUEUE_LEN* md_txLen;
 static MSG_QUEUE_LEN* md_rxLen;
 
 const uint8_t HMI_TX_QID = 1;
 const uint8_t HMI_RX_QID = 2;
-const uint8_t MD_TX_QID = 3;
-const uint8_t MD_RX_QID = 4;
+const uint8_t PC_TX_QID = 3;
+const uint8_t PC_RX_QID = 4;
 const uint8_t DEV_TX_QID = 5;
 const uint8_t DEV_RX_QID = 6;
 
@@ -121,11 +121,11 @@ void msg_Enqueue(uint8_t qid, uint8_t *msgBuff, uint8_t len)
 		case HMI_RX_QID:
 			qHead = &hmi_rxMsgQ;
 			break;
-		case MD_TX_QID:
-			qHead = &md_txMsgQ;
+		case PC_TX_QID:
+			qHead = &pc_txMsgQ;
 			break;
-		case MD_RX_QID:
-			qHead = &md_rxMsgQ;
+		case PC_RX_QID:
+			qHead = &pc_rxMsgQ;
 			break;
 		case DEV_TX_QID:
 			qHead = &dev_txMsgQ;
@@ -144,7 +144,7 @@ void msg_Enqueue(uint8_t qid, uint8_t *msgBuff, uint8_t len)
 	if(ptr == NULL)	//2D array is null
 	{
 		*qHead = element;
-		if(qid != MD_TX_QID && qid != MD_RX_QID)
+		if(qid != PC_TX_QID && qid != PC_RX_QID)
 			buffer_len[0] = len;
 	}
 	else	//2D array is not null and enqueue element.
@@ -156,7 +156,7 @@ void msg_Enqueue(uint8_t qid, uint8_t *msgBuff, uint8_t len)
 			i++;
 		}
 		ptr->next = element;
-		if(qid != MD_TX_QID && qid != MD_RX_QID)
+		if(qid != PC_TX_QID && qid != PC_RX_QID)
 			buffer_len[i] = len;
 		remain_tx = i;
 	}
@@ -177,15 +177,15 @@ uint8_t* msg_Dequeue(uint8_t qid)
 			if(ptr != NULL)
 				hmi_rxMsgQ = ptr->next;
 			break;
-		case MD_TX_QID:
-			ptr = md_txMsgQ;
+		case PC_TX_QID:
+			ptr = pc_txMsgQ;
 			if(ptr != NULL)
-				md_txMsgQ = ptr->next;
+				pc_txMsgQ = ptr->next;
 			break;
-		case MD_RX_QID:
-			ptr = md_rxMsgQ;
+		case PC_RX_QID:
+			ptr = pc_rxMsgQ;
 			if(ptr != NULL)
-				md_rxMsgQ = ptr->next;
+				pc_rxMsgQ = ptr->next;
 			break;
 		case DEV_TX_QID:
 			ptr = dev_txMsgQ;
