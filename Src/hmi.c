@@ -2,7 +2,7 @@
 #include "ui.h"
 
 extern uint8_t* hmi_buftx;
-extern uint8_t* md_buftx;
+extern uint8_t* pc_buftx;
 
 uint8_t* buffer = NULL;
 uint8_t data_length = 0;
@@ -20,11 +20,17 @@ _Bool hmi_in_led_page_flag = 0;
 
 static char* cInitPage = "page TM_init";
 static char* cMainPage = "page TM_main";
+static char* cAutoPage = "page TM_auto";
 
 static char* cDPS = "TM_main.t0.txt="; 
 static char* cDegree = "TM_main.t1.txt=";
+static char* cValueAutoModeTime = "TM_main.t2.txt=";
 static char* cValueExecutionTime = "TM_main.t3.txt=";
 static char* cValueMovement = "TM_main.t4.txt=";
+static char* cAutoModeTimeIntervalBcgColor = "TM_main.t2.bco="; 
+static char* cAutoHour = "TM_auto.t0.txt="; 
+static char* cAutoMin = "TM_auto.t1.txt=";
+static char* cAutoSec = "TM_auto.t2.txt="; 
 
 void reset_buffer(void)
 {
@@ -33,6 +39,7 @@ void reset_buffer(void)
 		buffer[i] = 0;
 	}
 }
+
 uint8_t* createMessageBuffer_HMI_DMA(char* str)
 {
 	buffer = msg_AllocateQ();
@@ -70,6 +77,17 @@ uint8_t* createMessageBuffer_HMI(char* str)
 	return buffer;
 }
 
+void Write_AutoModeTimeInterval_Background_to_HMI(int auto_mode_color)
+{	
+	memset(cMsg, 0x00, 30);
+	memset(Par, 0x00, 5);
+	
+	strcpy(cMsg, cAutoModeTimeIntervalBcgColor);
+	itoa2(auto_mode_color, Par, 5);
+	strcat(cMsg, Par);
+	Transmit_Msg(&huart1, createMessageBuffer_HMI(cMsg), data_length);
+}
+
 void WritePage_to_HMI(uint8_t title_index)
 {
 	if(title_index == last_title_index)
@@ -86,6 +104,9 @@ void WritePage_to_HMI(uint8_t title_index)
 			break;
 		case PAGE_MAIN:
 			strcpy(cMsg, cMainPage);
+			break;
+		case PAGE_AUTO:
+			strcpy(cMsg, cAutoPage);
 			break;
 		default:
 			return;
@@ -114,6 +135,18 @@ void Write_Parameters_To_HMI(uint8_t parameter_index,int parameter_value)
 			itoa2(parameter_value, Par, 3);
 			strcat(Par, " deg");
 			break;
+		case VALUE_AUTOMODE_TIME:
+			strcpy(cMsg, cValueAutoModeTime);
+			itoa2(automode_parameters.hour, cT, 2);
+			strcat(Par, cT);
+			strcat(Par, "H:");
+			itoa2(automode_parameters.minute, cT, 2);
+			strcat(Par, cT);
+			strcat(Par, "M:");
+			itoa2(automode_parameters.second, cT, 2);
+			strcat(Par, cT);
+			strcat(Par, "S");
+			break;
 		case VALUE_MOVEMENT:
 			strcpy(cMsg, cValueMovement);
 			itoa2((parameter_value % 10000), Par, 5);
@@ -130,6 +163,21 @@ void Write_Parameters_To_HMI(uint8_t parameter_index,int parameter_value)
 			itoa2(hmi_parameters.second, cT, 2);
 			strcat(Par, cT);
 			strcat(Par, "S");
+			break;
+		case PARAM_AUTOHOUR:
+			strcpy(cMsg, cAutoHour);
+			itoa2(parameter_value, Par, 2);
+			strcat(Par, " hour");
+			break;
+		case PARAM_AUTOMIN:
+			strcpy(cMsg, cAutoMin);
+			itoa2(parameter_value, Par, 2);
+			strcat(Par, " min");
+			break;
+		case PARAM_AUTOSEC:
+			strcpy(cMsg, cAutoSec);
+			itoa2(parameter_value, Par, 2);
+			strcat(Par, " sec");
 			break;
 		default:
 			return;

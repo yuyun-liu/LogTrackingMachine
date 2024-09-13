@@ -9,6 +9,7 @@
 #include "utility.h"
 #include "math.h"
 
+void Write_AutoModeTimeInterval_Background_to_HMI(int auto_mode_color);
 void WritePage_to_HMI(uint8_t title_index);
 void Write_Parameters_To_HMI(uint8_t parameter_index,int parameter_value);
 void Write_ErrorIindex_To_HMI(int error_page_index);
